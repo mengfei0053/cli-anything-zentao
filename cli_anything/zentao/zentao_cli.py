@@ -49,6 +49,9 @@ from cli_anything.zentao.core.task import (
     list_tasks, get_task, create_task, update_task,
     start_task, finish_task, close_task, cancel_task,
 )
+from cli_anything.zentao.core.effort import (
+    list_efforts, get_effort, add_effort, update_effort, delete_effort,
+)
 from cli_anything.zentao.core.bug import (
     list_bugs, get_bug, create_bug, update_bug,
     resolve_bug, activate_bug as activate_bug_op, close_bug as close_bug_op,
@@ -712,6 +715,91 @@ def task_cancel(ctx, task_id):
         ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
     )
     result = cancel_task(backend, task_id)
+    _output(result, ctx.parent.obj.get("as_json", False))
+
+
+# ── Effort / 工时 commands ────────────────────────────────────────────
+
+@cli.group()
+@click.pass_context
+def effort(ctx):
+    """Task effort / 工时管理."""
+    pass
+
+
+@effort.command("list")
+@click.argument("task_id", type=int)
+@click.option("--account", default="", help="Filter by user account")
+@click.option("--order-by", default="date,id")
+@click.pass_context
+def effort_list(ctx, task_id, account, order_by):
+    """List efforts (工时记录) for a task."""
+    backend = _make_backend(
+        ctx.parent.obj.get("url"), ctx.parent.obj.get("user"),
+        ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
+    )
+    result = list_efforts(backend, task_id, account, order_by)
+    _output(result, ctx.parent.obj.get("as_json", False))
+
+
+@effort.command("get")
+@click.argument("effort_id", type=int)
+@click.pass_context
+def effort_get(ctx, effort_id):
+    """Get effort details by ID."""
+    backend = _make_backend(
+        ctx.parent.obj.get("url"), ctx.parent.obj.get("user"),
+        ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
+    )
+    result = get_effort(backend, effort_id)
+    _output(result, ctx.parent.obj.get("as_json", False))
+
+
+@effort.command("add")
+@click.argument("task_id", type=int)
+@click.argument("consumed", type=float)
+@click.option("--left", type=float, help="Remaining hours (剩余工时)")
+@click.option("--date", help="Date (YYYY-MM-DD), defaults to today")
+@click.option("--account", help="User account, defaults to current user")
+@click.option("--work", help="Work description (工作内容)")
+@click.pass_context
+def effort_add(ctx, task_id, consumed, left, date, account, work):
+    """Add effort (工时记录) to a task."""
+    backend = _make_backend(
+        ctx.parent.obj.get("url"), ctx.parent.obj.get("user"),
+        ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
+    )
+    result = add_effort(backend, task_id, consumed, left, date, account, work)
+    _output(result, ctx.parent.obj.get("as_json", False))
+
+
+@effort.command("update")
+@click.argument("effort_id", type=int)
+@click.option("--consumed", type=float, help="Updated hours consumed")
+@click.option("--left", type=float, help="Updated remaining hours")
+@click.option("--date", help="Updated date (YYYY-MM-DD)")
+@click.option("--work", help="Updated work description")
+@click.pass_context
+def effort_update(ctx, effort_id, consumed, left, date, work):
+    """Update an effort record."""
+    backend = _make_backend(
+        ctx.parent.obj.get("url"), ctx.parent.obj.get("user"),
+        ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
+    )
+    result = update_effort(backend, effort_id, consumed, left, date, work)
+    _output(result, ctx.parent.obj.get("as_json", False))
+
+
+@effort.command("delete")
+@click.argument("effort_id", type=int)
+@click.pass_context
+def effort_delete(ctx, effort_id):
+    """Delete an effort record."""
+    backend = _make_backend(
+        ctx.parent.obj.get("url"), ctx.parent.obj.get("user"),
+        ctx.parent.obj.get("password"), ctx.parent.obj.get("token"),
+    )
+    result = delete_effort(backend, effort_id)
     _output(result, ctx.parent.obj.get("as_json", False))
 
 

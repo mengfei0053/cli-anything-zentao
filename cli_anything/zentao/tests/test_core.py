@@ -25,6 +25,9 @@ from cli_anything.zentao.core.story import (
 from cli_anything.zentao.core.task import (
     create_task, update_task, start_task, finish_task, close_task, cancel_task,
 )
+from cli_anything.zentao.core.effort import (
+    list_efforts, get_effort, add_effort, update_effort, delete_effort,
+)
 from cli_anything.zentao.core.bug import (
     create_bug, update_bug, resolve_bug, activate_bug, close_bug,
 )
@@ -121,6 +124,23 @@ class MockBackend:
 
     def cancel_task(self, task_id):
         return self._record("cancel_task", task_id)
+
+    # ── Effort ──
+
+    def list_efforts(self, task_id, account="", order_by="date,id"):
+        return self._record("list_efforts", task_id, account=account, order_by=order_by)
+
+    def get_effort(self, effort_id):
+        return self._record("get_effort", effort_id)
+
+    def add_effort(self, data):
+        return self._record("add_effort", data)
+
+    def update_effort(self, data):
+        return self._record("update_effort", data)
+
+    def delete_effort(self, effort_id):
+        return self._record("delete_effort", effort_id)
 
     def list_bugs(self, **kw):
         return self._record("list_bugs", **kw)
@@ -443,3 +463,52 @@ class TestBuildOperations:
     def test_delete_build(self, mock_backend):
         result = delete_build(mock_backend, 30)
         assert result["status"] == "success"
+
+
+# ── Effort operation tests ───────────────────────────────────────────
+
+class TestEffortOperations:
+    def test_list_efforts(self, mock_backend):
+        result = list_efforts(mock_backend, task_id=42)
+        assert result["status"] == "success"
+        assert mock_backend.calls[0][0] == "list_efforts"
+        assert mock_backend.calls[0][1][0] == 42
+
+    def test_list_efforts_with_account(self, mock_backend):
+        result = list_efforts(mock_backend, task_id=42, account="dev1")
+        assert result["status"] == "success"
+        kwargs = mock_backend.calls[0][2]
+        assert kwargs["account"] == "dev1"
+
+    def test_get_effort(self, mock_backend):
+        result = get_effort(mock_backend, effort_id=101)
+        assert result["status"] == "success"
+
+    def test_add_effort_builds_data(self, mock_backend):
+        result = add_effort(mock_backend, task_id=42, consumed=3.5, left=4.0, work="开发登录模块")
+        assert result["status"] == "success"
+        data = mock_backend.calls[0][1][0]
+        assert data["task"] == 42
+        assert data["consumed"] == 3.5
+        assert data["left"] == 4.0
+        assert data["work"] == "开发登录模块"
+
+    def test_add_effort_minimal(self, mock_backend):
+        result = add_effort(mock_backend, task_id=42, consumed=2.0)
+        assert result["status"] == "success"
+        data = mock_backend.calls[0][1][0]
+        assert "left" not in data
+        assert "work" not in data
+
+    def test_update_effort(self, mock_backend):
+        result = update_effort(mock_backend, effort_id=101, consumed=4.0, work="更新工作内容")
+        assert result["status"] == "success"
+        data = mock_backend.calls[0][1][0]
+        assert data["id"] == 101
+        assert data["consumed"] == 4.0
+
+    def test_delete_effort(self, mock_backend):
+        result = delete_effort(mock_backend, effort_id=101)
+        assert result["status"] == "success"
+        assert mock_backend.calls[0][0] == "delete_effort"
+        assert mock_backend.calls[0][1][0] == 101

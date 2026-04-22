@@ -1,8 +1,8 @@
 # cli-anything-zentao
 
-禅道（ZenTao）项目管理系统命令行工具，基于 [CLI-Anything](https://github.com/HKUDS/CLI-Anything) 方法论构建。
+> 🇨🇳 中文 | [🇬🇧 English](#english-version)
 
-## 项目简介
+禅道（ZenTao）项目管理系统命令行工具，基于 [CLI-Anything](https://github.com/HKUDS/CLI-Anything) 方法论构建。
 
 通过命令行即可完整操控禅道系统——无需浏览器或 GUI。支持单次子命令模式和交互式 REPL 模式，适合 AI Agent 和开发者使用。
 
@@ -14,10 +14,11 @@
 | **项目管理** | 迭代/项目增删改查 |
 | **需求管理** | 需求全生命周期（创建、编辑、关闭、激活） |
 | **任务管理** | 创建、编辑、开始、完成、关闭、取消 |
+| **工时管理** | 查看/添加/编辑/删除任务工时记录 |
 | **Bug 管理** | 创建、编辑、解决、激活、关闭 |
 | **测试用例** | 创建、更新、查看列表 |
 | **构建管理** | 创建、查看、删除 |
-| **JSON 输出** | `--json` 参数输出机器可读格式，方便 Agent 消费 |
+| **JSON 输出** | `--json` 参数输出机器可读格式 |
 | **交互式 REPL** | 带历史记录、自动补全和品牌化提示符 |
 
 ## 安装
@@ -50,18 +51,6 @@ cd /path/to/agent-harness/
 pip install -e .
 ```
 
-### 方式三：带 REPL 支持安装
-
-```bash
-pip install -e ".[repl]"
-```
-
-### 方式四：带开发依赖安装
-
-```bash
-pip install -e ".[dev]"
-```
-
 ## 配置
 
 设置环境变量以连接禅道服务器：
@@ -78,33 +67,12 @@ export ZENTAO_PASSWORD="你的密码"
 cli-anything-zentao --url http://localhost/zentao --user admin --password xxx
 ```
 
-也可以使用预生成的会话 Token：
-
-```bash
-export ZENTAO_TOKEN="your-session-token"
-```
-
 ## 使用方式
 
 ### 交互模式（默认）
 
-直接运行即可进入交互式 REPL：
-
 ```bash
 cli-anything-zentao
-```
-
-```
-╭────────────────────────────────────────────────────────────────────────╮
-│ ◆  cli-anything · Zentao                                               │
-│    v1.0.0                                                              │
-│                                                                        │
-│    Type help for commands, quit to exit                                │
-╰────────────────────────────────────────────────────────────────────────╯
-
-zentao ❯ products
-zentao ❯ create-product "我的产品" MP
-zentao ❯ quit
 ```
 
 ### 单次命令模式
@@ -129,6 +97,18 @@ cli-anything-zentao story create 1 "登录功能" \
 cli-anything-zentao task create 5 "编写单元测试" \
   --type devel --pri 2 --assigned-to dev1
 
+# 开始任务
+cli-anything-zentao task start 42
+
+# 添加任务工时
+cli-anything-zentao effort add 42 3.5 --left 4.0 --work "完成了登录模块开发"
+
+# 查看任务工时列表
+cli-anything-zentao effort list 42
+
+# 更新工时记录
+cli-anything-zentao effort update 101 --consumed 4.0 --work "修改工作内容"
+
 # 创建 Bug
 cli-anything-zentao bug create 1 "登录时空指针异常" \
   --severity 2 --pri 1 --type codeerror
@@ -143,14 +123,6 @@ cli-anything-zentao testcase create 1 "验证登录" \
 # 创建构建
 cli-anything-zentao build create 1 "v1.0.0" \
   --builder ci-bot --desc "正式版本构建"
-```
-
-### JSON 输出
-
-所有命令均支持 `--json` 参数，输出机器可读格式：
-
-```bash
-cli-anything-zentao --json product list
 ```
 
 ## 命令参考
@@ -182,12 +154,17 @@ cli-anything-zentao --json product list
 | `task finish <id>` | 完成任务 |
 | `task close <id>` | 关闭任务 |
 | `task cancel <id>` | 取消任务 |
+| `effort list <任务ID>` | 列出任务工时 |
+| `effort get <工时ID>` | 查看工时详情 |
+| `effort add <任务ID> <工时>` | 添加工时（支持 --left, --date, --work） |
+| `effort update <工时ID>` | 更新工时记录 |
+| `effort delete <工时ID>` | 删除工时记录 |
 | `bug list <产品ID>` | 列出 Bug |
 | `bug get <id>` | 查看 Bug 详情 |
 | `bug create <产品ID> <标题>` | 创建 Bug |
 | `bug update <id>` | 更新 Bug |
 | `bug resolve <id>` | 解决 Bug |
-| `bug activate <id>` | 重新激活已解决的 Bug |
+| `bug activate <id>` | 重新激活 Bug |
 | `bug close <id>` | 关闭 Bug |
 | `testcase list <产品ID>` | 列出测试用例 |
 | `testcase get <id>` | 查看用例详情 |
@@ -200,66 +177,16 @@ cli-anything-zentao --json product list
 
 ## 测试
 
-### 运行单元测试（无需禅道服务器）
-
 ```bash
+# 单元测试（无需禅道服务器）
 python -m pytest cli_anything/zentao/tests/test_core.py -v
-```
 
-### 运行 E2E 测试（需要禅道服务器）
-
-```bash
+# E2E 测试（需要禅道服务器）
 export ZENTAO_URL="http://localhost/zentao"
 export ZENTAO_USER="admin"
 export ZENTAO_PASSWORD="你的密码"
 python -m pytest cli_anything/zentao/tests/ -v
 ```
-
-### 强制已安装模式运行测试
-
-```bash
-CLI_ANYTHING_FORCE_INSTALLED=1 python -m pytest cli_anything/zentao/tests/ -v
-```
-
-## 项目结构
-
-```
-agent-harness/
-├── setup.py                    # 包配置
-├── README.md                   # 使用说明
-├── ZENTAO.md                   # 软件专属 SOP 文档
-└── cli_anything/
-    └── zentao/
-        ├── zentao_cli.py       # CLI 主入口
-        ├── core/               # 核心业务模块
-        │   ├── product.py      # 产品
-        │   ├── project.py      # 项目
-        │   ├── story.py        # 需求
-        │   ├── task.py         # 任务
-        │   ├── bug.py          # Bug
-        │   ├── testcase.py     # 测试用例
-        │   └── build.py        # 构建
-        ├── utils/              # 工具模块
-        │   ├── zentao_backend.py  # 禅道后端集成
-        │   └── repl_skin.py    # REPL 交互皮肤
-        └── tests/              # 测试
-            ├── TEST.md         # 测试计划与结果
-            ├── test_core.py    # 单元测试（37 个）
-            └── test_full_e2e.py # E2E/子进程测试（10 个）
-```
-
-## 测试统计
-
-| 指标 | 数值 |
-|------|------|
-| 总计 | 47 |
-| 通过 | 39 |
-| 跳过 | 8（需要 ZENTAO_URL） |
-| 失败 | 0 |
-| 执行时间 | 0.12s |
-
-- 单元测试：**37/37 通过 (100%)**
-- CLI 基础测试：**2/2 通过 (100%)**
 
 ## AI Agent 集成
 
@@ -269,8 +196,115 @@ agent-harness/
 npx skills add HKUDS/CLI-Anything --skill cli-anything-zentao -g -y
 ```
 
-Skill 文件为 Agent 提供完整的命令参考和使用示例。
+---
 
-## 许可证
+## English Version
+
+### CLI for [ZenTao](https://www.zentao.pm/) Project Management
+
+A command-line interface for ZenTao, built using the [CLI-Anything](https://github.com/HKUDS/CLI-Anything) methodology. Lets AI agents and developers manage projects, tasks, bugs, and more — entirely from the terminal.
+
+### Features
+
+| Module | Capabilities |
+|--------|-------------|
+| **Product** | Create, list, update, delete products |
+| **Project** | Sprint/project CRUD |
+| **Story** | Full lifecycle (create, edit, close, activate) |
+| **Task** | Create, edit, start, finish, close, cancel |
+| **Effort** | List/add/update/delete task work hour records |
+| **Bug** | Create, edit, resolve, activate, close |
+| **Testcase** | Create, update, list |
+| **Build** | Create, list, delete |
+| **`--json`** | Machine-readable output for agent consumption |
+| **REPL** | Interactive mode with history and branded prompt |
+
+### Installation
+
+```bash
+# From GitHub (recommended)
+pip install git+https://github.com/mengfei0053/cli-anything-zentao.git
+
+# From source
+cd /path/to/agent-harness/
+pip install -e .
+
+# Upgrade
+pip install --upgrade git+https://github.com/mengfei0053/cli-anything-zentao.git
+```
+
+### Configuration
+
+```bash
+export ZENTAO_URL="http://localhost/zentao"
+export ZENTAO_USER="admin"
+export ZENTAO_PASSWORD="your_password"
+```
+
+### Usage Examples
+
+```bash
+# List products
+cli-anything-zentao --json product list
+
+# Create a task
+cli-anything-zentao task create 5 "Write unit tests" \
+  --type devel --pri 2 --assigned-to dev1
+
+# Add work hours (effort)
+cli-anything-zentao effort add 42 3.5 --left 4.0 --work "Completed login module"
+
+# List efforts for a task
+cli-anything-zentao effort list 42
+
+# Update an effort record
+cli-anything-zentao effort update 101 --consumed 4.0 --work "Updated work log"
+
+# Resolve a bug
+cli-anything-zentao bug resolve 42 --resolution fixed
+```
+
+### Testing
+
+```bash
+# Unit tests (no server needed)
+python -m pytest cli_anything/zentao/tests/test_core.py -v
+
+# E2E tests (requires ZenTao server)
+export ZENTAO_URL="http://localhost/zentao"
+export ZENTAO_USER="admin"
+export ZENTAO_PASSWORD="***"
+python -m pytest cli_anything/zentao/tests/ -v
+```
+
+### Project Structure
+
+```
+agent-harness/
+├── setup.py
+├── README.md
+├── ZENTAO.md
+└── cli_anything/
+    └── zentao/
+        ├── zentao_cli.py        # CLI entry point
+        ├── core/                # Business modules
+        │   ├── product.py
+        │   ├── project.py
+        │   ├── story.py
+        │   ├── task.py
+        │   ├── effort.py        # Task effort/work hour management
+        │   ├── bug.py
+        │   ├── testcase.py
+        │   └── build.py
+        ├── utils/
+        │   ├── zentao_backend.py
+        │   └── repl_skin.py
+        └── tests/
+            ├── TEST.md
+            ├── test_core.py
+            └── test_full_e2e.py
+```
+
+### License
 
 MIT

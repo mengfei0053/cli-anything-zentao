@@ -595,6 +595,31 @@ class ZenTaoBackend:
 
     # ── Connection test ────────────────────────────────────────────────
 
+    # ── Effort / Work Hour ─────────────────────────────────────────────
+
+    def list_efforts(self, task_id: int, account: str = "", order_by: str = "date,id") -> dict:
+        """List effort (work hour) records for a task."""
+        params = {"taskIdList": task_id, "orderBy": order_by}
+        if account:
+            params["account"] = account
+        return self.call("task", "getTaskEfforts", params)
+
+    def get_effort(self, effort_id: int) -> dict:
+        """Get effort record by ID."""
+        return self.call("task", "getTaskEfforts", {"taskIdList": "", "effortID": effort_id})
+
+    def add_effort(self, data: dict) -> dict:
+        """Add effort (work hour) to a task."""
+        return self.call("task", "addTaskEffort", post_data=data)
+
+    def update_effort(self, data: dict) -> dict:
+        """Update an effort record."""
+        return self.call("task", "updateEffort", post_data=data)
+
+    def delete_effort(self, effort_id: int) -> dict:
+        """Delete (soft-delete) an effort record."""
+        return self.call("task", "deleteWorkhour", {"effortID": effort_id})
+
     def test_connection(self) -> dict:
         """Test connection to ZenTao instance.
 
