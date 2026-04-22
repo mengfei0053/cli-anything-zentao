@@ -9,7 +9,7 @@ setup(
     name="cli-anything-zentao",
     version="1.0.0",
     description="CLI interface for ZenTao project management system",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="CLI-Anything Contributors",
     license="MIT",
