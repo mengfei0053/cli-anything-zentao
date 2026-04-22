@@ -25,20 +25,36 @@ This CLI lets AI agents and developers interact with ZenTao's project management
 - Python 3.8+
 - A running ZenTao instance (accessible via HTTP)
 
-### Install from source
+### Method 1: Install from GitHub (Recommended)
+
+```bash
+pip install git+https://github.com/mengfei0053/cli-anything-zentao.git
+```
+
+With REPL support:
+```bash
+pip install "git+https://github.com/mengfei0053/cli-anything-zentao.git#egg=cli-anything-zentao[repl]"
+```
+
+Update to latest:
+```bash
+pip install --upgrade git+https://github.com/mengfei0053/cli-anything-zentao.git
+```
+
+### Method 2: Install from source
 
 ```bash
 cd /path/to/agent-harness/
 pip install -e .
 ```
 
-### Install with REPL support
+### Method 3: Install with REPL support
 
 ```bash
 pip install -e ".[repl]"
 ```
 
-### Install with dev dependencies
+### Method 4: Install with dev dependencies
 
 ```bash
 pip install -e ".[dev]"
