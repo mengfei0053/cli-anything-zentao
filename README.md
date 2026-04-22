@@ -1,235 +1,276 @@
 # cli-anything-zentao
 
-CLI interface for the [ZenTao](https://www.zentao.pm/) project management system, built using the [CLI-Anything](https://github.com/HKUDS/CLI-Anything) methodology.
+禅道（ZenTao）项目管理系统命令行工具，基于 [CLI-Anything](https://github.com/HKUDS/CLI-Anything) 方法论构建。
 
-## Overview
+## 项目简介
 
-This CLI lets AI agents and developers interact with ZenTao's project management features entirely from the command line — no browser or GUI required. It supports both one-shot subcommand mode and an interactive REPL.
+通过命令行即可完整操控禅道系统——无需浏览器或 GUI。支持单次子命令模式和交互式 REPL 模式，适合 AI Agent 和开发者使用。
 
-### Features
+### 功能特性
 
-- **Product management** — create, list, update, delete products
-- **Project management** — sprint/project CRUD
-- **Story/requirement management** — full lifecycle (create, edit, close, activate)
-- **Task management** — create, edit, start, finish, close, cancel
-- **Bug management** — create, edit, resolve, activate, close
-- **Test case management** — create, update, list
-- **Build management** — create, list, delete
-- **`--json` flag** — machine-readable output for agent consumption
-- **Interactive REPL** — with history, auto-suggest, and branded prompt
+| 模块 | 功能 |
+|------|------|
+| **产品管理** | 创建、查看、更新、删除产品 |
+| **项目管理** | 迭代/项目增删改查 |
+| **需求管理** | 需求全生命周期（创建、编辑、关闭、激活） |
+| **任务管理** | 创建、编辑、开始、完成、关闭、取消 |
+| **Bug 管理** | 创建、编辑、解决、激活、关闭 |
+| **测试用例** | 创建、更新、查看列表 |
+| **构建管理** | 创建、查看、删除 |
+| **JSON 输出** | `--json` 参数输出机器可读格式，方便 Agent 消费 |
+| **交互式 REPL** | 带历史记录、自动补全和品牌化提示符 |
 
-## Installation
+## 安装
 
-### Prerequisites
+### 环境要求
 
 - Python 3.8+
-- A running ZenTao instance (accessible via HTTP)
+- 运行中的禅道实例（可通过 HTTP 访问）
 
-### Method 1: Install from GitHub (Recommended)
+### 方式一：从 GitHub 安装（推荐）
 
 ```bash
 pip install git+https://github.com/mengfei0053/cli-anything-zentao.git
 ```
 
-With REPL support:
+带 REPL 支持：
 ```bash
 pip install "git+https://github.com/mengfei0053/cli-anything-zentao.git#egg=cli-anything-zentao[repl]"
 ```
 
-Update to latest:
+更新到最新版：
 ```bash
 pip install --upgrade git+https://github.com/mengfei0053/cli-anything-zentao.git
 ```
 
-### Method 2: Install from source
+### 方式二：从源码安装
 
 ```bash
 cd /path/to/agent-harness/
 pip install -e .
 ```
 
-### Method 3: Install with REPL support
+### 方式三：带 REPL 支持安装
 
 ```bash
 pip install -e ".[repl]"
 ```
 
-### Method 4: Install with dev dependencies
+### 方式四：带开发依赖安装
 
 ```bash
 pip install -e ".[dev]"
 ```
 
-## Configuration
+## 配置
 
-Set environment variables to connect to your ZenTao server:
+设置环境变量以连接禅道服务器：
 
 ```bash
 export ZENTAO_URL="http://localhost/zentao"
 export ZENTAO_USER="admin"
-export ZENTAO_PASSWORD="your_password"
+export ZENTAO_PASSWORD="你的密码"
 ```
 
-Alternatively, pass credentials via CLI flags:
+或者通过命令行参数传入：
 
 ```bash
 cli-anything-zentao --url http://localhost/zentao --user admin --password xxx
 ```
 
-Or use a pre-generated session token:
+也可以使用预生成的会话 Token：
 
 ```bash
 export ZENTAO_TOKEN="your-session-token"
 ```
 
-## Usage
+## 使用方式
 
-### Interactive REPL (default)
+### 交互模式（默认）
+
+直接运行即可进入交互式 REPL：
 
 ```bash
 cli-anything-zentao
 ```
 
-This launches an interactive session with a branded prompt:
-
 ```
-◆ cli-anything · ZenTao    v1.0.0
-◇ Install:   npx skills add HKUDS/CLI-Anything --skill cli-anything-zentao -g -y
-◇ Global skill:  ~/.agents/skills/cli-anything-zentao/SKILL.md
-
-   Type help for commands, quit to exit
-
-   Type help for commands, quit to exit
+╭────────────────────────────────────────────────────────────────────────╮
+│ ◆  cli-anything · Zentao                                               │
+│    v1.0.0                                                              │
+│                                                                        │
+│    Type help for commands, quit to exit                                │
+╰────────────────────────────────────────────────────────────────────────╯
 
 zentao ❯ products
-zentao ❯ create-product "My Product" MP
+zentao ❯ create-product "我的产品" MP
 zentao ❯ quit
 ```
 
-### Subcommand mode
+### 单次命令模式
 
 ```bash
-# Test connection
+# 测试连接
 cli-anything-zentao connect
 
-# List products (JSON output)
+# 列出所有产品（JSON 格式）
 cli-anything-zentao --json product list
 
-# Create a project
-cli-anything-zentao project create "Sprint 1" "SP1" \
+# 创建项目
+cli-anything-zentao project create "迭代1" "SP1" \
   --model scrum --type sprint \
   --begin 2025-01-01 --end 2025-01-31
 
-# Create a story
-cli-anything-zentao story create 1 "Login feature" \
-  --spec "As a user I want to login" --pri 1
+# 创建需求
+cli-anything-zentao story create 1 "登录功能" \
+  --spec "作为用户我想要登录系统" --pri 1
 
-# Create a task
-cli-anything-zentao task create 5 "Write unit tests" \
+# 创建任务
+cli-anything-zentao task create 5 "编写单元测试" \
   --type devel --pri 2 --assigned-to dev1
 
-# Create a bug
-cli-anything-zentao bug create 1 "Null pointer on login" \
+# 创建 Bug
+cli-anything-zentao bug create 1 "登录时空指针异常" \
   --severity 2 --pri 1 --type codeerror
 
-# Resolve a bug
+# 解决 Bug
 cli-anything-zentao bug resolve 42 --resolution fixed
 
-# Create a test case
-cli-anything-zentao testcase create 1 "Verify login" \
-  --steps "1. Enter creds 2. Click login" --pri 1
+# 创建测试用例
+cli-anything-zentao testcase create 1 "验证登录" \
+  --steps "1. 输入账号密码 2. 点击登录" --pri 1
 
-# Create a build
+# 创建构建
 cli-anything-zentao build create 1 "v1.0.0" \
-  --builder ci-bot --desc "Release build"
+  --builder ci-bot --desc "正式版本构建"
 ```
 
-### JSON output
+### JSON 输出
 
-All commands support the `--json` flag for machine-readable output:
+所有命令均支持 `--json` 参数，输出机器可读格式：
 
 ```bash
 cli-anything-zentao --json product list
 ```
 
-## Command Reference
+## 命令参考
 
-| Command | Description |
-|---------|-------------|
-| `connect` | Test connection to ZenTao server |
-| `product list` | List all products |
-| `product get <id>` | Get product details |
-| `product create <name> <code>` | Create a new product |
-| `product update <id>` | Update a product |
-| `product delete <id>` | Delete a product |
-| `project list` | List all projects |
-| `project get <id>` | Get project details |
-| `project create <name> <code>` | Create a new project |
-| `project update <id>` | Update a project |
-| `project delete <id>` | Delete a project |
-| `story list <product_id>` | List stories for a product |
-| `story get <id>` | Get story details |
-| `story create <product_id> <title>` | Create a story |
-| `story update <id>` | Update a story |
-| `story close <id>` | Close a story |
-| `story activate <id>` | Activate a closed story |
-| `task list <execution_id>` | List tasks for an execution |
-| `task get <id>` | Get task details |
-| `task create <exec_id> <name>` | Create a task |
-| `task update <id>` | Update a task |
-| `task start <id>` | Start a task |
-| `task finish <id>` | Finish a task |
-| `task close <id>` | Close a task |
-| `task cancel <id>` | Cancel a task |
-| `bug list <product_id>` | List bugs for a product |
-| `bug get <id>` | Get bug details |
-| `bug create <product_id> <title>` | Create a bug |
-| `bug update <id>` | Update a bug |
-| `bug resolve <id>` | Resolve a bug |
-| `bug activate <id>` | Reopen a resolved bug |
-| `bug close <id>` | Close a bug |
-| `testcase list <product_id>` | List test cases |
-| `testcase get <id>` | Get test case details |
-| `testcase create <product_id> <title>` | Create a test case |
-| `testcase update <id>` | Update a test case |
-| `build list` | List builds |
-| `build get <id>` | Get build details |
-| `build create <product_id> <name>` | Create a build |
-| `build delete <id>` | Delete a build |
+| 命令 | 描述 |
+|------|------|
+| `connect` | 测试禅道服务器连接 |
+| `product list` | 列出所有产品 |
+| `product get <id>` | 查看产品详情 |
+| `product create <名称> <编码>` | 创建产品 |
+| `product update <id>` | 更新产品 |
+| `product delete <id>` | 删除产品 |
+| `project list` | 列出所有项目 |
+| `project get <id>` | 查看项目详情 |
+| `project create <名称> <编码>` | 创建项目 |
+| `project update <id>` | 更新项目 |
+| `project delete <id>` | 删除项目 |
+| `story list <产品ID>` | 列出产品需求 |
+| `story get <id>` | 查看需求详情 |
+| `story create <产品ID> <标题>` | 创建需求 |
+| `story update <id>` | 更新需求 |
+| `story close <id>` | 关闭需求 |
+| `story activate <id>` | 激活已关闭的需求 |
+| `task list <执行ID>` | 列出任务 |
+| `task get <id>` | 查看任务详情 |
+| `task create <执行ID> <名称>` | 创建任务 |
+| `task update <id>` | 更新任务 |
+| `task start <id>` | 开始任务 |
+| `task finish <id>` | 完成任务 |
+| `task close <id>` | 关闭任务 |
+| `task cancel <id>` | 取消任务 |
+| `bug list <产品ID>` | 列出 Bug |
+| `bug get <id>` | 查看 Bug 详情 |
+| `bug create <产品ID> <标题>` | 创建 Bug |
+| `bug update <id>` | 更新 Bug |
+| `bug resolve <id>` | 解决 Bug |
+| `bug activate <id>` | 重新激活已解决的 Bug |
+| `bug close <id>` | 关闭 Bug |
+| `testcase list <产品ID>` | 列出测试用例 |
+| `testcase get <id>` | 查看用例详情 |
+| `testcase create <产品ID> <标题>` | 创建用例 |
+| `testcase update <id>` | 更新用例 |
+| `build list` | 列出构建 |
+| `build get <id>` | 查看构建详情 |
+| `build create <产品ID> <名称>` | 创建构建 |
+| `build delete <id>` | 删除构建 |
 
-## Testing
+## 测试
 
-### Run unit tests (no server required)
+### 运行单元测试（无需禅道服务器）
 
 ```bash
 python -m pytest cli_anything/zentao/tests/test_core.py -v
 ```
 
-### Run E2E tests (requires ZenTao server)
+### 运行 E2E 测试（需要禅道服务器）
 
 ```bash
 export ZENTAO_URL="http://localhost/zentao"
 export ZENTAO_USER="admin"
-export ZENTAO_PASSWORD="your_password"
+export ZENTAO_PASSWORD="你的密码"
 python -m pytest cli_anything/zentao/tests/ -v
 ```
 
-### Run with force-installed mode
+### 强制已安装模式运行测试
 
 ```bash
 CLI_ANYTHING_FORCE_INSTALLED=1 python -m pytest cli_anything/zentao/tests/ -v
 ```
 
-## AI Agent Integration
+## 项目结构
 
-Install the SKILL.md for AI agent discovery:
+```
+agent-harness/
+├── setup.py                    # 包配置
+├── README.md                   # 使用说明
+├── ZENTAO.md                   # 软件专属 SOP 文档
+└── cli_anything/
+    └── zentao/
+        ├── zentao_cli.py       # CLI 主入口
+        ├── core/               # 核心业务模块
+        │   ├── product.py      # 产品
+        │   ├── project.py      # 项目
+        │   ├── story.py        # 需求
+        │   ├── task.py         # 任务
+        │   ├── bug.py          # Bug
+        │   ├── testcase.py     # 测试用例
+        │   └── build.py        # 构建
+        ├── utils/              # 工具模块
+        │   ├── zentao_backend.py  # 禅道后端集成
+        │   └── repl_skin.py    # REPL 交互皮肤
+        └── tests/              # 测试
+            ├── TEST.md         # 测试计划与结果
+            ├── test_core.py    # 单元测试（37 个）
+            └── test_full_e2e.py # E2E/子进程测试（10 个）
+```
+
+## 测试统计
+
+| 指标 | 数值 |
+|------|------|
+| 总计 | 47 |
+| 通过 | 39 |
+| 跳过 | 8（需要 ZENTAO_URL） |
+| 失败 | 0 |
+| 执行时间 | 0.12s |
+
+- 单元测试：**37/37 通过 (100%)**
+- CLI 基础测试：**2/2 通过 (100%)**
+
+## AI Agent 集成
+
+安装 SKILL.md 供 AI Agent 发现：
 
 ```bash
 npx skills add HKUDS/CLI-Anything --skill cli-anything-zentao -g -y
 ```
 
-The skill file provides agents with complete command reference and usage examples.
+Skill 文件为 Agent 提供完整的命令参考和使用示例。
 
-## License
+## 许可证
 
 MIT
